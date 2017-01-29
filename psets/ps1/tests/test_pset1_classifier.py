@@ -260,7 +260,10 @@ def test_lr_d6_1():
 def test_feats_d7_1():
     global y_dv
     y_hat_dv = evaluation.read_predictions('bakeoff-dev.preds')
-    assert_greater_equal(evaluation.acc(y_hat_dv,y_dv),.78)
+    print "------------------------------------"
+    print evaluation.acc(y_hat_dv,y_dv)
+    print "------------------------------------"
+    assert_greater_equal(evaluation.acc(y_hat_dv,y_dv),.95)
 
 # +1 extra credit if you pass this test
 def test_feats_d7_1_test():

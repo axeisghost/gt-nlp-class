@@ -1,4 +1,5 @@
 from gtnlplib.constants import OFFSET
+from heapq import nlargest
 import numpy as np
 
 # hint! use this.
@@ -13,7 +14,11 @@ def make_feature_vector(base_features,label):
     :rtype: dict
 
     """
-    raise NotImplementedError
+    re = {}
+    re[(label, OFFSET)] = 1
+    for feature in base_features:
+        re[(label, feature)] = base_features[feature]
+    return re
     
 def predict(base_features,weights,labels):
     """prediction function
@@ -25,7 +30,12 @@ def predict(base_features,weights,labels):
     :rtype: string, dict
 
     """
-    raise NotImplementedError
+    scores = dict((label, 0.0) for label in labels)
+    for label in scores.iterkeys():
+        fv = make_feature_vector(base_features, label)
+        for pair, cnt in fv.iteritems():
+            if weights.has_key(pair):
+                scores[label] += weights[pair] * cnt
     return argmax(scores),scores
 
 def predict_all(x,weights,labels):
@@ -48,4 +58,13 @@ def get_top_features_for_label(weights,label,k=5):
     :returns: list of tuples of features and weights
     :rtype: list
     """
-    raise NotImplementedError
+    h = []
+    for pair, val in weights.iteritems():
+        if (pair[0] == label):
+            h.append((val, pair[1]))
+    re = nlargest(k, h)
+    for i in range(len(re)):
+        re[i] = ((label, re[i][1]), re[i][0])
+    return re
+    
+    

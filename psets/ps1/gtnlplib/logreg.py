@@ -16,7 +16,14 @@ def compute_py(x,weights,labels):
 
     """
     # hint: you should use clf_base.predict and logsumexp
-    raise NotImplementedError
+    _, re = predict(x, weights, labels)
+    norm_sum = np.exp(logsumexp(re.values()))
+    for label, val in re.iteritems():
+        re[label] = np.exp(val) / norm_sum
+    return re
+
+
+
     
 def estimate_logreg(x,y,N_its,learning_rate=1e-4,regularizer=1e-2,lazy_reg=True):
     """estimate a logistic regression classifier
@@ -60,9 +67,17 @@ def estimate_logreg(x,y,N_its,learning_rate=1e-4,regularizer=1e-2,lazy_reg=True)
 
             p_y = compute_py(x_i,weights,all_labels) #hint
 
-            # YOUR CODE GOES HERE
+            update_amount = make_feature_vector(x_i,y_i)
+            for label in all_labels:
+                expected_xy = make_feature_vector(x_i,label)
+                for pair, val in expected_xy.iteritems():
+                    if update_amount.has_key(pair):
+                        update_amount[pair] -= expected_xy[pair] * p_y[label]
+                    else:
+                        update_amount[pair] = -1.0 * expected_xy[pair] * p_y[label]
+            for pair, val in update_amount.iteritems():
+                weights[pair] += learning_rate * val
             
-            raise NotImplementedError
 
         print it,
         weight_hist.append(weights.copy()) 

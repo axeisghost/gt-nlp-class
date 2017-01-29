@@ -6,7 +6,7 @@ def get_token_type_ratio(vocabulary):
     :rtype: float
 
     """
-    raise NotImplementedError
+    return float(sum(vocabulary.values())) / float(len(vocabulary))
 
 def type_frequency(vocabulary, k):
     """compute the number of words that occur exactly k times
@@ -17,7 +17,7 @@ def type_frequency(vocabulary, k):
     :rtype: int
 
     """
-    raise NotImplementedError
+    return vocabulary.values().count(k)
 
 def unseen_types(first_vocab, second_vocab):
     """compute the number of words that appear in the second vocab but not in the first vocab
@@ -28,4 +28,4 @@ def unseen_types(first_vocab, second_vocab):
     :rtype: int
 
     """
-    raise NotImplementedError
+    return len(set(second_vocab) - set(first_vocab))

@@ -15,4 +15,19 @@ theta_hand_original = defaultdict(float,
                          })
 
 # add some more weights to this for deliverable 2.3
-theta_hand = defaultdict(float)
+theta_hand = defaultdict(float, {('worldnews','worldnews'):1.,
+                          ('worldnews','news'):.5,
+                          ('worldnews','world'):.5,
+                          ('worldnews','american'):.5,
+                          ('worldnews','politics'):.5,
+                          ('worldnews','territory'):.5,
+                          ('worldnews','government'):.4,
+                          ('science','science'):1.,
+                          ('science','study'):0.5,
+                          ('askreddit','askreddit'):1.,
+                          ('askreddit','ask'):0.5,
+                          ('iama','iama'):1,
+                          ('todayilearned','til'):1.,
+                          ('todayilearned','todayilearned'):1.,
+                          ('iama',constants.OFFSET):0.1
+                         })

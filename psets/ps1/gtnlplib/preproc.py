@@ -1,6 +1,7 @@
 import nltk
 import pandas as pd
 from collections import Counter
+import string as str
 
 def tokenize_and_downcase(string,vocab=None):
     """for a given string, corresponding to a document:
@@ -14,7 +15,12 @@ def tokenize_and_downcase(string,vocab=None):
 
     """
     bow = Counter()
-    raise NotImplementedError
+    sentences = nltk.tokenize.sent_tokenize(string, language='english')
+    words = []
+    for sent in sentences:
+        words += nltk.tokenize.word_tokenize(sent, language='english')
+    for word in words:
+        bow[word.lower()] += 1
     return bow
 
 
@@ -42,5 +48,16 @@ def custom_preproc(string):
 
     """
     bow = Counter()
-    raise NotImplementedError
+    sentences = nltk.tokenize.sent_tokenize(string, language='english')
+    words = []
+    stop = nltk.corpus.stopwords.words('english') + list(str.punctuation)
+    for sent in sentences:
+        tmp_words = nltk.tokenize.word_tokenize(sent, language='english')
+        # words += nltk.ngrams(tmp_words, 2)
+        for word in tmp_words:
+            if word not in stop:
+                words.append(word)
+                
+    # bow = Counter(nltk.ngrams(words, 2))
+    bow = Counter(words)
     return bow
