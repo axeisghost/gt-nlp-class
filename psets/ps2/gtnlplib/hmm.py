@@ -15,7 +15,11 @@ def hmm_features(tokens,curr_tag,prev_tag,m):
     :rtype: dict
 
     """
-    raise NotImplementedError
+    re = {}
+    if not curr_tag == START_TAG and not curr_tag == END_TAG:
+        re[(curr_tag, tokens[m], EMIT)] = 1
+    re[(curr_tag, prev_tag, TRANS)] = 1
+    return re
     
 
 def compute_HMM_weights(trainfile,smoothing):
@@ -27,17 +31,22 @@ def compute_HMM_weights(trainfile,smoothing):
     :rtype: defaultdict, list
 
     """
-    # hint: these are your first two lines
+    
     tag_trans_counts = most_common.get_tag_trans_counts(trainfile)
     all_tags = tag_trans_counts.keys()
-
-    # hint: call compute_transition_weights
-    # hint: set weights for illegal transitions to -np.inf
-    # hint: call get_tag_word_counts and estimate_nb_tagger
-    # hint: Counter.update() combines two Counters
-
-    # hint: return weights, all_tags
-    raise NotImplementedError
+    all_tags.append(END_TAG)
+    words_counts = most_common.get_tag_word_counts(trainfile)
+    sorted_tags = sorted(words_counts.keys())
+    
+    nb_weights = naive_bayes.estimate_nb([words_counts[tag] for tag in sorted_tags], sorted_tags, smoothing)
+    re = defaultdict(float)
+    for key, val in nb_weights.iteritems():
+        if not key[1] == OFFSET:
+            re[(key[0], key[1], EMIT)] = val
+    for tag in all_tags:
+        re[(tag, END_TAG, TRANS)] = -np.inf
+    re.update(compute_transition_weights(tag_trans_counts, smoothing))
+    return re, all_tags
 
 
 def compute_transition_weights(trans_counts, smoothing):
@@ -54,6 +63,23 @@ def compute_transition_weights(trans_counts, smoothing):
     """
 
     weights = defaultdict(float)
-    raise NotImplementedError
-    
+    all_tags_without_END = trans_counts.keys()
+    all_tags = trans_counts.keys()
+    all_tags.append(END_TAG)
+    dominator = defaultdict(float)
+    for curr_tag in all_tags:
+        for prev_tag in all_tags_without_END:
+            if not curr_tag == START_TAG:
+                weights[(curr_tag, prev_tag, TRANS)] += smoothing
+                if trans_counts.has_key(prev_tag) and trans_counts[prev_tag].has_key(curr_tag):
+                    weights[(curr_tag, prev_tag, TRANS)] += trans_counts[prev_tag][curr_tag]
+                dominator[prev_tag] += weights[(curr_tag, prev_tag, TRANS)]
+            else:
+                weights[(curr_tag, prev_tag, TRANS)] = -np.inf
+    for feat in weights.keys():
+        if not weights[feat] == -np.inf:
+            weights[feat] = np.log(weights[feat] / dominator[feat[1]])
+    return weights
+
+            
 

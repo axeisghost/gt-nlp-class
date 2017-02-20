@@ -17,9 +17,11 @@ def get_tag_word_counts(filename):
 
     # your code here
     # hint: for words, tags in enumerate(preproc.conll_seq_generator(TRAIN_FILE)):
-
-    raise NotImplementedError
-
+    all_tags = set()
+    for i, (words, tags) in enumerate(conll_seq_generator(filename)):
+        for j in range(len(words)):
+            all_counters[tags[j]].update([words[j]])
+    
     return all_counters
 
 def get_noun_weights():
@@ -42,7 +44,10 @@ def get_most_common_word_weights(trainfile):
 
     """
     weights = defaultdict(float)
-    raise NotImplementedError
+    for i, (words, tags) in enumerate(conll_seq_generator(trainfile)):
+        for j in range(len(words)):
+            weights[(tags[j], words[j])] += 1.0
+    weights[('NOUN', OFFSET)] = 0.1
     return weights
 
 def get_tag_trans_counts(trainfile):

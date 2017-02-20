@@ -11,8 +11,7 @@ def make_classifier_tagger(weights):
     :returns: a function that takes a list of words, and a list of candidate tags, and returns tags for all words
     :rtype: function
 
-    """
-    # inner function, which is what you return    
+    """  
     def classify(words, all_tags):
         """This nested function should return a list of tags, computed using a classifier with the weights passed as arguments to make_classifier_tagger
 
@@ -22,7 +21,13 @@ def make_classifier_tagger(weights):
         :rtype: list
 
         """
-        return None
+        re = []
+        for word in words:
+            tmp_feature = {}
+            tmp_feature[word] = 1.0
+            pred, _ = clf_base.predict(tmp_feature, weights, all_tags)
+            re.append(pred)
+        return re
     return classify
 
 def apply_tagger(tagger,outfilename,all_tags=None,trainfile=TRAIN_FILE,testfile=DEV_FILE):

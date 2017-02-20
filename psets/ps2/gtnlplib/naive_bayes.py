@@ -14,8 +14,22 @@ def estimate_nb(x,y,smoothing):
     :rtype: defaultdict 
 
     """
-    #hint: use your solution from pset 1
-    raise NotImplementedError
+    counts_y = defaultdict(float)
+    counts_xy_sum = defaultdict(float)
+    counts_xy = defaultdict(float)
+    vocab = set()
+    for features, label in zip(x,y):
+        counts_y[label] += 1.0
+        for word, val in features.iteritems():
+            vocab.update([word])
+            counts_xy[(label, word)] += float(val)
+            counts_xy_sum[label] += float(val)
+    for v in vocab:
+        for l in counts_xy_sum.iterkeys():
+            counts_xy[(l, v)] = np.log((smoothing + counts_xy[(l, v)]) / (counts_xy_sum[l] + smoothing * float(len(vocab))))
+    for l, val in counts_y.iteritems():
+        counts_xy[(l, OFFSET)] = np.log(val / float(len(y)))
+    return counts_xy
 
 def estimate_nb_tagger(counters,smoothing):
     """build a tagger based on the naive bayes classifier, which correctly accounts for the prior P(Y)
@@ -26,5 +40,13 @@ def estimate_nb_tagger(counters,smoothing):
     :rtype: defaultdict
 
     """
-    # hint: call estimate_nb, then modify the output
-    raise NotImplementedError
+    sorted_tags = sorted(counters.keys())
+    nb_weights = estimate_nb([counters[tag] for tag in sorted_tags], sorted_tags, smoothing)
+    tot_sum = 0.0
+    for tag in sorted_tags:
+        cnt_sum = sum(counters[tag].values())
+        tot_sum += cnt_sum
+        nb_weights[(tag, OFFSET)] = cnt_sum
+    for tag in sorted_tags:
+        nb_weights[(tag, OFFSET)] = np.log(nb_weights[(tag, OFFSET)] / tot_sum)
+    return nb_weights

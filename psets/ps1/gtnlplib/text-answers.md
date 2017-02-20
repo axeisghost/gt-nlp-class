@@ -18,12 +18,106 @@ Result weights when using smoothing=0.001 will have a larger value for some feat
 Now compare the top 5 features for logistic regression under the largest regularizer and the smallest regularizer.
 Paste the output into ```text_answers.md```, and explain the difference. (.4/.2 points)
 
-smallest:[(('worldnews', u'russia'), 0.35173027429611731), (('worldnews', u'plane'), 0.33929653702158746), (('worldnews', u'ukraine'), 0.33449249276556642), (('worldnews', u'russian'), 0.31561831703819393), (('worldnews', u'ai'), 0.29723311599291224)]
+clf_base.get_top_features_for_label(theta_lr_largest,'worldnews',5)
+Out[102]:
+[(('worldnews', u'russia'), 0.15238179434582572),
+ (('worldnews', '**OFFSET**'), 0.15159169645252937),
+ (('worldnews', u'ukraine'), 0.13716125304025434),
+ (('worldnews', u'plane'), 0.12821311362528562),
+ (('worldnews', u'russian'), 0.12428483166042341)]
+In [103]:
 
-largest:[(('worldnews', u'russia'), 0.15238179434582572), (('worldnews', u'ukraine'), 0.13716125304025434), (('worldnews', u'plane'), 0.12821311362528562), (('worldnews', u'russian'), 0.12428483166042341), (('worldnews', u'country'), 0.10785404613741061)]
+science
+clf_base.get_top_features_for_label(theta_lr_largest,'science',5)
+Out[103]:
+[(('science', u'research'), 0.12331215784129235),
+ (('science', '**OFFSET**'), 0.11489780106416261),
+ (('science', u'ebv'), 0.11092335575172059),
+ (('science', u'study'), 0.11004485054345244),
+ (('science', u'corn'), 0.1098369005311165)]
+In [104]:
 
-The Larger regularizer in linear regression will make the size of weights smaller. The top 5 features result also confirm this point. 
-Between two result top features, the smallest regularizer ranked "plane" before "ukraine" and include "ai" as top feature. On the other hand, the largest regularizer rank "ukraine" before "plane" and has "country" before "ai". It is easy to see that "country" will appear more than "ai" does. Because a large regularizer limit the size of weights, it cannot has a large weight to emphasize low frequency word ("ai"). "country" with a high frequency is still important and it could has a small weight to show its importance. As a result, "country" was ranked higher than "ai" when regularizer is large.
+askreddit
+clf_base.get_top_features_for_label(theta_lr_largest,'askreddit',5)
+Out[104]:
+[(('askreddit', u'i'), 0.095505663433061938),
+ (('askreddit', u'my'), 0.085127428874173017),
+ (('askreddit', u'*'), 0.085119495766494219),
+ (('askreddit', u'try'), 0.083626979741890553),
+ (('askreddit', u'one'), 0.072437889267936484)]
+In [105]:
+
+clf_base.get_top_features_for_label(theta_lr_largest,'iama',5)
+Out[105]:
+[(('iama', u'!'), 0.16692808321261768),
+ (('iama', '**OFFSET**'), 0.15625556395515852),
+ (('iama', u'you'), 0.10193474196495818),
+ (('iama', u'your'), 0.097378260185317839),
+ (('iama', u'i'), 0.08569558535204902)]
+In [106]:
+
+rned
+clf_base.get_top_features_for_label(theta_lr_largest,'todayilearned',5)
+Out[106]:
+[(('todayilearned', u'hr'), 0.09036576440289884),
+ (('todayilearned', u"''"), 0.072869501671811346),
+ (('todayilearned', u'apple'), 0.068808179941801842),
+ (('todayilearned', u'``'), 0.066824703164426125),
+ (('todayilearned', u'latin'), 0.064957420070386407)]
+In [107]:
+
+'worldnews
+clf_base.get_top_features_for_label(theta_lr_smallest,'worldnews',5)
+Out[107]:
+[(('worldnews', u'russia'), 0.35173027429611731),
+ (('worldnews', u'plane'), 0.33929653702158746),
+ (('worldnews', u'ukraine'), 0.33449249276556642),
+ (('worldnews', u'russian'), 0.31561831703819393),
+ (('worldnews', u'ai'), 0.29723311599291224)]
+In [108]:
+
+science
+clf_base.get_top_features_for_label(theta_lr_smallest,'science',5)
+Out[108]:
+[(('science', u'research'), 0.33806221372344875),
+ (('science', u'study'), 0.30292907164499189),
+ (('science', u'ebv'), 0.29695098107817364),
+ (('science', u'corn'), 0.2694436469585616),
+ (('science', u'evolution'), 0.22752261138310378)]
+In [109]:
+
+askreddit
+clf_base.get_top_features_for_label(theta_lr_smallest,'askreddit',5)
+Out[109]:
+[(('askreddit', u'porn'), 0.20638394817830613),
+ (('askreddit', u'one'), 0.18865452344783626),
+ (('askreddit', u'some'), 0.17260046631410891),
+ (('askreddit', u'go'), 0.15842356639569363),
+ (('askreddit', u'try'), 0.14945713565235963)]
+In [110]:
+
+iama
+clf_base.get_top_features_for_label(theta_lr_smallest,'iama',5)
+Out[110]:
+[(('iama', u'!'), 0.24586885174163214),
+ (('iama', u'gun'), 0.23250197213754356),
+ (('iama', u'thanks'), 0.21211165450797811),
+ (('iama', u'state'), 0.21176761634631636),
+ (('iama', u'request'), 0.20128478057500812)]
+In [111]:
+
+rned
+clf_base.get_top_features_for_label(theta_lr_smallest,'todayilearned',5)
+Out[111]:
+[(('todayilearned', u'hr'), 0.27103036267056163),
+ (('todayilearned', u'apple'), 0.21347132896878651),
+ (('todayilearned', u'latin'), 0.20945198209359212),
+ (('todayilearned', u'bear'), 0.16111617423438407),
+ (('todayilearned', u'women'), 0.14135577149133641)]
+
+The Larger regularizer in linear regression will make the size of weights smaller or smoothier. The top 5 features result also confirm this point.
+Since the over-smoothed difference between features, even OFFSET will be ranked as top features in largest regularizer case.
+Between two result top features in worldnews, the smallest regularizer ranked "plane" before "ukraine" and include "ai" as top feature. On the other hand, the largest regularizer rank "ukraine" before "plane" and has "country" before "ai". It is easy to see that "country" will appear more than "ai" does. Because a large regularizer limit the size of weights, it cannot has a large weight to emphasize low frequency word ("ai"). "country" with a high frequency is still important and it could has a small weight to show its importance. As a result, "country" was ranked higher than "ai" when regularizer is large.
 
 # Deliverable 7.2
 
