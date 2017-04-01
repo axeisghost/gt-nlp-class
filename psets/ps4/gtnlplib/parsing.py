@@ -135,11 +135,13 @@ class ParserState:
         if action == Actions.REDUCE_L:
             head_entry = (right_entry.headword, right_entry.headword_pos)
             modifier_entry = (left_entry.headword, left_entry.headword_pos)
-            self.stack.append(right_entry)
+            self.stack.append(StackEntry(right_entry.headword, right_entry.headword_pos,
+                                         self.combiner(right_entry.embedding, left_entry.embedding)))
         else:
             head_entry = (left_entry.headword, left_entry.headword_pos)
             modifier_entry = (right_entry.headword, right_entry.headword_pos)
-            self.stack.append(left_entry)
+            self.stack.append(StackEntry(left_entry.headword, left_entry.headword_pos,
+                                         self.combiner(left_entry.embedding, right_entry.embedding)))
         return DepGraphEdge(head_entry, modifier_entry)
         # END STUDENT
 
@@ -251,7 +253,6 @@ class TransitionParser(nn.Module):
         # END STUDENT
 
         dep_graph.add(DepGraphEdge((ROOT_TOK, -1), (parser_state.stack[-1].headword, parser_state.stack[-1].headword_pos)))
-        print outputs[10]
         return outputs, dep_graph, actions_done
 
 

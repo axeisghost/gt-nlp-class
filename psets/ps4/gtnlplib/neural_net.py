@@ -198,7 +198,7 @@ class MLPCombinerNetwork(nn.Module):
         # The output of the first linear layer should be embedding_dim
         # (the rest of the input/output dims are thus totally determined)
         self.first_affline = nn.Linear(2 * embedding_dim, embedding_dim)
-        # self.first_tanh = nn.Tanh()
+        self.first_tanh = nn.Tanh()
         self.second_affline = nn.Linear(embedding_dim, embedding_dim)
         # END STUDENT
 
@@ -214,7 +214,7 @@ class MLPCombinerNetwork(nn.Module):
         # STUDENT
         flatten_input = utils.concat_and_flatten([head_embed, modifier_embed])
         flowing_tensor = self.first_affline(flatten_input)
-        flowing_tensor = F.tanh(flowing_tensor)
+        flowing_tensor = self.first_tanh(flowing_tensor)
         flowing_tensor = self.second_affline(flowing_tensor)
         return flowing_tensor
         # END STUDENT
@@ -320,9 +320,9 @@ class ActionChooserNetwork(nn.Module):
         # 1. The first linear layer (the one that is called first in the network)
         # 2. The second linear layer
         self.first_affline = nn.Linear(input_dim, input_dim)
-        # self.first_relu = F.relu()
+        self.first_relu = nn.ReLU()
         self.second_affline = nn.Linear(input_dim, 3)
-        # self.output_softMax = F.log_softmax()
+        self.output_softmax = nn.LogSoftmax()
         # END STUDENT
 
     def forward(self, inputs):
@@ -337,8 +337,8 @@ class ActionChooserNetwork(nn.Module):
         # STUDENT
         flatten_input = utils.concat_and_flatten(inputs)
         flowing_tensor = self.first_affline(flatten_input)
-        flowing_tensor = F.relu(flowing_tensor)
+        flowing_tensor = self.first_relu(flowing_tensor)
         flowing_tensor = self.second_affline(flowing_tensor)
-        flowing_tensor = F.log_softmax(flowing_tensor)
+        flowing_tensor = self.output_softmax(flowing_tensor)
         return flowing_tensor
         # END STUDENT
