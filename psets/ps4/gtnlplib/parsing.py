@@ -71,7 +71,7 @@ class ParserState:
         <END-OF-INPUT> should not be shifted onto the stack ever.
         """
         # STUDENT
-        pass
+        return self.stack_len() <= 1 and self.input_buffer_peek_n(1)[0].headword == END_OF_INPUT_TOK
         # END STUDENT
 
     def stack_len(self):
@@ -129,6 +129,18 @@ class ParserState:
         
         # STUDENT
         # hint: use list.pop()
+        right_entry = self.stack.pop()
+        left_entry = self.stack.pop()
+
+        if action == Actions.REDUCE_L:
+            head_entry = (right_entry.headword, right_entry.headword_pos)
+            modifier_entry = (left_entry.headword, left_entry.headword_pos)
+            self.stack.append(right_entry)
+        else:
+            head_entry = (left_entry.headword, left_entry.headword_pos)
+            modifier_entry = (right_entry.headword, right_entry.headword_pos)
+            self.stack.append(left_entry)
+        return DepGraphEdge(head_entry, modifier_entry)
         # END STUDENT
 
     def __str__(self):
@@ -209,9 +221,37 @@ class TransitionParser(nn.Module):
             have_gold_actions = False
 
         # STUDENT
+        while not parser_state.done_parsing():
+            action_now = -1
+            feats = self.feature_extractor.get_features(parser_state)
+            flowed_tensor = self.action_chooser(feats)
+            outputs.append(flowed_tensor)
+            action_now = utils.argmax(flowed_tensor)
+            if have_gold_actions:
+                action_now = action_queue.popleft()
+                if len(action_queue) < 1:
+                    have_gold_actions = False
+
+            if action_now == Actions.SHIFT and parser_state.input_buffer_peek_n(1)[0].headword == END_OF_INPUT_TOK:
+                action_now = Actions.REDUCE_R
+            if action_now != Actions.SHIFT and parser_state.stack_len() <= 1:
+                action_now = Actions.SHIFT
+
+            if action_now == Actions.SHIFT:
+                parser_state.shift()
+            elif action_now == Actions.REDUCE_R:
+                dep_graph.add(parser_state.reduce_right())
+            else:
+                dep_graph.add(parser_state.reduce_left())
+            actions_done.append(action_now)
+
+
+
+
         # END STUDENT
 
         dep_graph.add(DepGraphEdge((ROOT_TOK, -1), (parser_state.stack[-1].headword, parser_state.stack[-1].headword_pos)))
+        print outputs[10]
         return outputs, dep_graph, actions_done
 
 

@@ -49,6 +49,7 @@ class VanillaWordEmbeddingLookup(nn.Module):
 
         # STUDENT
         # name your embedding member "word_embeddings"
+        self.word_embeddings = nn.Embedding(len(word_to_ix), embedding_dim)
         # END STUDENT
 
 
@@ -63,6 +64,11 @@ class VanillaWordEmbeddingLookup(nn.Module):
         inp = utils.sequence_to_variable(sentence, self.word_to_ix, self.use_cuda)
         embeds = [] # store each Variable in here
         # STUDENT
+        # tmp_ret = self.word_embeddings(inp)
+        # for each in tmp_ret:
+        #     embeds.append(ag.Variable(torch.unsqueeze(each.data, 0)))
+        for each in inp:
+            embeds.append(self.word_embeddings(each))
         # END STUDENT
         return embeds
 
@@ -191,6 +197,9 @@ class MLPCombinerNetwork(nn.Module):
         # 2. The second linear layer
         # The output of the first linear layer should be embedding_dim
         # (the rest of the input/output dims are thus totally determined)
+        self.first_affline = nn.Linear(2 * embedding_dim, embedding_dim)
+        # self.first_tanh = nn.Tanh()
+        self.second_affline = nn.Linear(embedding_dim, embedding_dim)
         # END STUDENT
 
     def forward(self, head_embed, modifier_embed):
@@ -203,7 +212,11 @@ class MLPCombinerNetwork(nn.Module):
         :return The embedding of the combination as a row vector
         """
         # STUDENT
-        pass
+        flatten_input = utils.concat_and_flatten([head_embed, modifier_embed])
+        flowing_tensor = self.first_affline(flatten_input)
+        flowing_tensor = F.tanh(flowing_tensor)
+        flowing_tensor = self.second_affline(flowing_tensor)
+        return flowing_tensor
         # END STUDENT
 
 
@@ -306,6 +319,10 @@ class ActionChooserNetwork(nn.Module):
         # Construct in this order:
         # 1. The first linear layer (the one that is called first in the network)
         # 2. The second linear layer
+        self.first_affline = nn.Linear(input_dim, input_dim)
+        # self.first_relu = F.relu()
+        self.second_affline = nn.Linear(input_dim, 3)
+        # self.output_softMax = F.log_softmax()
         # END STUDENT
 
     def forward(self, inputs):
@@ -318,5 +335,10 @@ class ActionChooserNetwork(nn.Module):
             (it is a row vector, with an entry for each action)
         """
         # STUDENT
-        pass
+        flatten_input = utils.concat_and_flatten(inputs)
+        flowing_tensor = self.first_affline(flatten_input)
+        flowing_tensor = F.relu(flowing_tensor)
+        flowing_tensor = self.second_affline(flowing_tensor)
+        flowing_tensor = F.log_softmax(flowing_tensor)
+        return flowing_tensor
         # END STUDENT
