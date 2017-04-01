@@ -14,7 +14,10 @@ def word_feats(words,y,y_prev,m):
     :rtype: dict
 
     """
-    fv = dict()    
+    fv = dict()
+    fv[(y, constants.OFFSET)] = 1.0
+    if m < len(words):
+        fv[(y, constants.CURR_WORD_FEAT ,words[m])] = 1.0
     return fv
 
 # Deliverable 2.1
@@ -32,7 +35,9 @@ def word_suff_feats(words,y,y_prev,m):
     :rtype: dict
 
     """
-    raise NotImplementedError
+    fv = word_feats(words,y,y_prev,m)
+    fv[(y, constants.SUFFIX_FEAT, words[m][-2:])] = 1.0
+    return fv
     
 def word_neighbor_feats(words,y,y_prev,m):
     """compute features for the current word being tagged, its predecessor, and its successor.
@@ -47,23 +52,61 @@ def word_neighbor_feats(words,y,y_prev,m):
     """
 
     # hint: use constants.PREV_WORD_FEAT and constants.NEXT_WORD_FEAT
-    raise NotImplementedError
-
+    fv = word_feats(words,y,y_prev,m)
+    if m > 0:
+        fv[(y, constants.PREV_WORD_FEAT, words[m-1])] = 1.0
+    else:
+        fv[(y, constants.PREV_WORD_FEAT, constants.PRE_START_TOKEN)] = 1.0
+    if m < len(words) - 1:
+        fv[(y, constants.NEXT_WORD_FEAT, words[m+1])] = 1.0
+    elif m < len(words):
+        fv[(y, constants.NEXT_WORD_FEAT, constants.POST_END_TOKEN)] = 1.0
+    return fv
     
 def word_feats_competitive_en(words,y,y_prev,m):
-    raise NotImplementedError
+    fv = word_feats(words,y,y_prev,m)
+    if m > 0:
+        fv[(y, constants.PREV_WORD_FEAT, words[m-1])] = 1.0
+    else:
+        fv[(y, constants.PREV_WORD_FEAT, constants.PRE_START_TOKEN)] = 1.0
+    if m < len(words) - 1:
+        fv[(y, constants.NEXT_WORD_FEAT, words[m+1])] = 1.0
+    elif m < len(words):
+        fv[(y, constants.NEXT_WORD_FEAT, constants.POST_END_TOKEN)] = 1.0
+    fv[(y, constants.SUFFIX_FEAT, words[m][-2:])] = 1.0
+    fv[(y, "--LENGTH--", str(len(words[m])))] = 0.2
+    return fv
     
 def word_feats_competitive_ja(words,y,y_prev,m):
-    raise NotImplementedError
+    fv = word_feats(words,y,y_prev,m)
+    if m > 0:
+        fv[(y, constants.PREV_WORD_FEAT, words[m-1])] = 1.0
+    else:
+        fv[(y, constants.PREV_WORD_FEAT, constants.PRE_START_TOKEN)] = 1.0
+    if m < len(words) - 1:
+        fv[(y, constants.NEXT_WORD_FEAT, words[m+1])] = 1.0
+    elif m < len(words):
+        fv[(y, constants.NEXT_WORD_FEAT, constants.POST_END_TOKEN)] = 1.0
+    fv[(y, "--LENGTH--", str(len(words[m])))] = 0.5
+    fv[(y, "--PREFIX-FEAT--", words[m][:2])] = 1.0
+    fv[(y, constants.SUFFIX_FEAT, words[m][-2:])] = 1.0
+    return fv
 
 def hmm_feats(words,y,y_prev,m):
-    fv = dict()
+    fv = {}
+    if m < len(words):
+        fv[(y, constants.CURR_WORD_FEAT, words[m])] = 1.0
+    fv[(y, constants.PREV_TAG_FEAT, y_prev)] = 1.0
     return fv
 
 def hmm_feats_competitive_en(words,y,y_prev,m):
-    raise NotImplementedError
+    fv = hmm_feats(words,y,y_prev,m)
+    fv.update(word_feats_competitive_en(words,y,y_prev,m))
+    return fv
 
 def hmm_feats_competitive_ja(words,y,y_prev,m):
-    raise NotImplementedError
+    fv = hmm_feats(words,y,y_prev,m)
+    fv.update(word_feats_competitive_ja(words,y,y_prev,m))
+    return fv
 
 

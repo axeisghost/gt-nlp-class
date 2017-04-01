@@ -14,7 +14,27 @@ def sp_update(tokens,tags,weights,feat_func,tagger,all_tags):
     :rtype: defaultdict
 
     """
-    raise NotImplementedError
+    M = len(tags)
+    predicted_labels, _ = tagger(tokens,feat_func,weights,all_tags)
+    update = defaultdict(float)
+    for i in range(len(predicted_labels)):
+        if not predicted_labels[i] == tags[i]:
+            negative_update = {}
+            pos_update = {}
+            if i <= 0:
+                pos_update = feat_func(tokens, tags[i], constants.START_TAG, i)
+                negative_update = feat_func(tokens, predicted_labels[i], constants.START_TAG, i)
+            else:
+                pos_update = feat_func(tokens, tags[i], tags[i-1], i)
+                negative_update = feat_func(tokens, predicted_labels[i], predicted_labels[i-1], i)
+            for pair, val in pos_update.iteritems():
+                update[pair] += val
+            for pair, val in negative_update.iteritems():
+                update[pair] -= val
+    # end_update = feat_func(tokens, constants.END_TAG, tags[-1], M)
+    # for pair, val in end_update.iteritems():
+    #     update[pair] += val
+    return update
     
 def estimate_perceptron(labeled_instances,feat_func,tagger,N_its,all_tags=None):
     """Estimate a structured perceptron
@@ -50,7 +70,22 @@ def estimate_perceptron(labeled_instances,feat_func,tagger,N_its,all_tags=None):
     weight_history = []
 
     # the rest is up to you!
-    raise NotImplementedError
+    w_sum = defaultdict(float) #hint
+    avg_weights = defaultdict(float)
+    # tokens, tags = labeled_instances
+    t=0.0 #hint
+    for it in xrange(N_its):
+        for tokens, tags in labeled_instances:
+            curr_update_amount = sp_update(tokens,tags,weights,feat_func,tagger,all_tags)
+            for pair, val in curr_update_amount.iteritems():
+                weights[pair] += float(val)
+                w_sum[pair] += t * float(val)
+            t += 1.0
+        avg_weights = weights.copy()
+        for pair, val in w_sum.iteritems():
+            avg_weights[pair] -= (val / t)
+        weight_history.append(avg_weights.copy())
+    return avg_weights, weight_history
 
 
 

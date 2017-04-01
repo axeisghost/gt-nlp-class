@@ -98,7 +98,7 @@ def viterbi_tagger(tokens,feat_func,weights,all_tags):
     # Step 1: find last tag and best score
     final_scores = {}
     for tag, val in trellis[len(trellis) - 1].iteritems():
-        # tmp_feat = feat_func(tokens, END_TAG, tag, len(tokens))
+        # tmp_feat = feat_func(tokens, END_TAG, tag, len(tokens)-1)
         final_scores[tag] = val[0]
         # if weights.has_key(tmp_feat.keys()[0]):
         #     final_scores[tag] += weights[tmp_feat.keys()[0]]
