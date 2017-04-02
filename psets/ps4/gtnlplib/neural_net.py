@@ -106,6 +106,8 @@ class BiLSTMWordEmbeddingLookup(nn.Module):
         # Note we want the output dim to be hidden_dim, but since our LSTM
         # is bidirectional, we need to make the output of each direction hidden_dim/2
         # name your embedding member "word_embeddings"
+        self.word_embeddings = nn.Embedding(len(word_to_ix), word_embedding_dim)
+        self.bilstm = nn.LSTM(word_embedding_dim, hidden_dim / 2, num_layers, dropout = dropout, bidirectional = True)
         # END STUDENT
 
         self.hidden = self.init_hidden()
@@ -132,6 +134,15 @@ class BiLSTMWordEmbeddingLookup(nn.Module):
         inp = utils.sequence_to_variable(sentence, self.word_to_ix, self.use_cuda)
 
         # STUDENT
+        flowing_tensor = self.word_embeddings(inp)
+        flowing_tensor = flowing_tensor.view(len(inp), 1, -1)
+        flowing_tensor, self.hidden = self.bilstm(flowing_tensor, self.hidden)
+        output = []
+        for i in range(len(inp)):
+            output.append(flowing_tensor[i])
+        return output
+
+
         # END STUDENT
 
     def init_hidden(self):
@@ -247,6 +258,7 @@ class LSTMCombinerNetwork(nn.Module):
         self.use_cuda = False
 
         # STUDENT
+        self.lstm = nn.LSTM(2 * embedding_dim, embedding_dim, num_layers)
         # END STUDENT
 
         self.hidden = self.init_hidden()
@@ -284,7 +296,11 @@ class LSTMCombinerNetwork(nn.Module):
         :param modifier_embed Embedding of the modifier
         """
         # STUDENT
-        pass
+        flowing_tensor = utils.concat_and_flatten([head_embed, modifier_embed])
+        flowing_tensor = flowing_tensor.view(len(flowing_tensor), 1, -1)
+        flowing_tensor, self.hidden = self.lstm(flowing_tensor, self.hidden)
+
+        return utils.concat_and_flatten(self.hidden[0])
         # END STUDENT
 
 
